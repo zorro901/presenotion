@@ -394,3 +394,8 @@ yarn.lock
 
 #generated manifest
 public/manifest.json
+
+# Playwright
+/playwright-report/
+/test-results/
+/playwright/.cache/

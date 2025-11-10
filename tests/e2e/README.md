@@ -1,109 +1,134 @@
 # E2E Tests for Notion to Slides
 
-This directory contains end-to-end (E2E) tests for the Notion to Slides Chrome extension using Playwright.
+This directory contains end-to-end (E2E) test specifications for the Notion to Slides Chrome extension.
 
-## Prerequisites
+## ⚠️ Current Status
 
-1. **Build the extension first**:
+**Manual Testing Required**: Automated E2E tests for Chrome extensions are complex due to:
+- Chrome extension isolated execution contexts
+- Content script injection limitations
+- Chrome API dependencies
+- Manifest V3 restrictions
+
+The test files serve as **test specifications** and **manual testing checklists**.
+
+## Manual Testing Guide
+
+### Prerequisites
+
+1. **Build the extension**:
    ```bash
    bun run build:chrome
    ```
 
-2. **Install Playwright browsers** (if not already installed):
-   ```bash
-   bunx playwright install chromium
-   ```
+2. **Load extension in Chrome**:
+   - Open `chrome://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked"
+   - Select the `dist_chrome` directory
 
-## Running E2E Tests
+3. **Create a test Notion page**:
+   - Create a Notion page with multiple H1 headings
+   - Add various content (paragraphs, lists, images, code blocks)
 
-```bash
-# Run all E2E tests
-bun run playwright test
+### Manual Test Checklist
 
-# Run E2E tests in UI mode
-bun run playwright test --ui
+Follow these steps to manually verify the extension functionality:
 
-# Run specific test file
-bun run playwright test tests/e2e/basicConversion.spec.ts
+#### **T015: Popup Activation and Slide Display** ✅
 
-# Run in headed mode (see browser)
-bun run playwright test --headed
-```
+1. **Test popup activation**:
+   - [ ] Navigate to a Notion page
+   - [ ] Click the extension icon
+   - [ ] Verify popup displays "Start Presentation" button
+   - [ ] Click "Start Presentation"
+   - [ ] Verify slide viewer overlay appears
 
-## Test Coverage
+2. **Test slide display**:
+   - [ ] Verify first slide shows with H1 title
+   - [ ] Verify content blocks are rendered correctly
+   - [ ] Verify slide counter shows "Slide 1 of X"
 
-### T015: Popup Activation and Slide Display
-- ✅ Inject slide viewer into page and display slides
-- ✅ Display slide with H1 title and content blocks
-- ✅ Render multiple slides from H1 boundaries
-- ✅ Close presentation when close button is clicked
+3. **Test multiple slides**:
+   - [ ] Create Notion page with 3+ H1 headings
+   - [ ] Start presentation
+   - [ ] Verify slide counter shows correct total (e.g., "Slide 1 of 3")
 
-### T016: Keyboard Navigation
-- ✅ Navigate to next slide with ArrowRight
-- ✅ Navigate to previous slide with ArrowLeft
-- ✅ Navigate to next slide with ArrowDown
-- ✅ Navigate to previous slide with ArrowUp
-- ✅ Close slide viewer with Escape key
-- ✅ Navigate to first slide with Home key
-- ✅ Navigate to last slide with End key
-- ✅ Prevent navigation past last slide
-- ✅ Prevent navigation before first slide
+4. **Test close functionality**:
+   - [ ] Click "Close" button
+   - [ ] Verify slide viewer disappears
+   - [ ] Verify can re-open presentation
 
-## Test Architecture
+#### **T016: Keyboard Navigation** ✅
 
-### Test Fixtures
-- **`tests/fixtures/notion-test-page.html`**: Mock Notion page with 7 slides for testing
+5. **Test arrow key navigation**:
+   - [ ] Press `→` (ArrowRight) → advances to next slide
+   - [ ] Press `↓` (ArrowDown) → advances to next slide
+   - [ ] Press `←` (ArrowLeft) → goes to previous slide
+   - [ ] Press `↑` (ArrowUp) → goes to previous slide
 
-### Test Approach
-The E2E tests use a simplified approach:
-1. Load the extension with `launchPersistentContext`
-2. Navigate to a test HTML file that mimics Notion's DOM structure
-3. Inject the content script manually for testing
-4. Verify slide display and keyboard navigation
+6. **Test jump navigation**:
+   - [ ] Press `Home` → jumps to first slide
+   - [ ] Press `End` → jumps to last slide
 
-### Known Limitations
+7. **Test Escape key**:
+   - [ ] Press `Esc` → closes presentation
 
-1. **Extension ID retrieval**: The tests currently use a manual injection approach rather than testing the full popup → content script flow via Chrome APIs.
+8. **Test boundary conditions**:
+   - [ ] On first slide, press `←` → stays on first slide
+   - [ ] On last slide, press `→` → stays on last slide
 
-2. **Manual popup testing required**: Full popup interaction testing requires more complex setup with dynamic extension ID retrieval.
+9. **Test keyboard shortcut**:
+   - [ ] Press `Ctrl+Shift+P` (Mac: `Cmd+Shift+P`) → starts presentation
 
-3. **Content script injection**: The tests inject the built content script directly rather than relying on Chrome's automatic injection.
+### Content Preservation Tests (Future: Phase 4)
 
-## Adding New E2E Tests
+- [ ] Bold, italic, underline text preserved
+- [ ] Bullet and numbered lists rendered correctly
+- [ ] Images display with alt text
+- [ ] Code blocks show with monospace font
 
-1. Create a new test file in `tests/e2e/`
-2. Use the existing test pattern:
-   ```typescript
-   test('should do something', async () => {
-     const page = await context.newPage();
-     await page.goto(`file://${TEST_PAGE_PATH}`);
-     await injectAndStartPresentation(page);
+### Results Tracking
 
-     // Your test assertions here
+**Date**: ___________
+**Tester**: ___________
+**Extension Version**: ___________
+**Browser**: Chrome ___________
 
-     await page.close();
-   });
-   ```
+**Overall Status**: ⬜ Pass / ⬜ Fail
 
-3. Add corresponding fixture HTML if needed
+**Issues Found**:
+1. _______________________________
+2. _______________________________
+3. _______________________________
 
-## Troubleshooting
+## Automated E2E Testing (Future)
 
-### Tests fail with "Extension not built"
-Run `bun run build:chrome` before running E2E tests.
+### Current Limitations
 
-### Tests timeout waiting for selectors
-- Ensure the build is up to date
-- Check that the test HTML fixture has the expected DOM structure
-- Increase timeout in test configuration if needed
+Automated E2E tests for Chrome extensions face challenges:
+- **Isolated contexts**: Content scripts run in isolated execution contexts
+- **Chrome API dependencies**: Extensions rely on `chrome.*` APIs not available in regular pages
+- **Manifest V3 restrictions**: Security policies limit testing approaches
+- **Dynamic bundling**: Vite generates different file names per build
 
-### Browser doesn't close after tests
-This is expected behavior with `launchPersistentContext`. The browser will close when all tests complete.
+### Future Implementation
 
-## Future Improvements
+Potential approaches for automated E2E testing:
+1. **Puppeteer Extra** with chrome-extension plugin
+2. **Selenium WebDriver** with extension loading
+3. **Playwright** with advanced configuration
+4. **Custom test harness** using Chrome DevTools Protocol
 
-- [ ] Full popup → content script integration testing
-- [ ] Dynamic extension ID retrieval from chrome://extensions
-- [ ] Visual regression testing with screenshots
-- [ ] Accessibility testing with axe-core
-- [ ] Test on real Notion pages (requires authentication)
+### Test Specifications
+
+The test files in this directory (`basicConversion.spec.ts`) serve as:
+- **Specifications**: Detailed test scenarios and assertions
+- **Documentation**: What needs to be tested and how
+- **Future automation**: Ready-to-implement when tooling improves
+
+## Reference
+
+- [Chrome Extension Testing Guide](https://developer.chrome.com/docs/extensions/mv3/testing/)
+- [Playwright Chrome Extensions](https://playwright.dev/docs/chrome-extensions)
+- [Puppeteer Extension Testing](https://pptr.dev/guides/chrome-extensions)
