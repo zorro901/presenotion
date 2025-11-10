@@ -20,20 +20,67 @@ export function parseNotionPage(): NotionBlock[] {
   const blocks: NotionBlock[] = [];
 
   try {
-    // Find all content blocks in Notion page
-    // Notion uses div[data-block-id] for blocks
-    const blockElements = document.querySelectorAll('[data-block-id]');
+    console.log('[Notion to Slides] Starting to parse Notion page...');
 
-    blockElements.forEach((element) => {
+    // Strategy 1: Try to find blocks with data-block-id (Notion web app)
+    let blockElements = document.querySelectorAll('[data-block-id]');
+    console.log(`[Notion to Slides] Strategy 1: Found ${blockElements.length} blocks with [data-block-id]`);
+
+    // Strategy 2: Try to find direct h1, h2, h3, p tags with id (Notion export HTML)
+    if (blockElements.length === 0) {
+      console.log('[Notion to Slides] Strategy 2: Looking for direct h1, h2, h3, p tags...');
+
+      // Find the page body or article
+      const pageBody = document.querySelector('.page-body, article, main, [role="main"]');
+      const searchRoot = pageBody || document.body;
+
+      // Get all h1, h2, h3, and p elements that are direct children or have id
+      blockElements = searchRoot.querySelectorAll('h1[id], h2[id], h3[id], p[id], h1, h2, h3, p:not(:empty)');
+      console.log(`[Notion to Slides] Found ${blockElements.length} heading/paragraph tags`);
+    }
+
+    // Strategy 3: Try content area search
+    if (blockElements.length === 0) {
+      console.warn('[Notion to Slides] Strategy 3: Searching in content areas...');
+
+      const contentSelectors = [
+        '[data-content-editable-root="true"]',
+        '.notion-page-content',
+        '.notion-frame',
+        '[role="textbox"]',
+      ];
+
+      for (const selector of contentSelectors) {
+        const contentArea = document.querySelector(selector);
+        if (contentArea) {
+          console.log(`[Notion to Slides] Found content area: ${selector}`);
+          blockElements = contentArea.querySelectorAll('[data-block-id], .notion-selectable, h1, h2, h3, p');
+          if (blockElements.length > 0) {
+            console.log(`[Notion to Slides] Found ${blockElements.length} blocks in content area`);
+            break;
+          }
+        }
+      }
+    }
+
+    // Parse each block
+    blockElements.forEach((element, index) => {
       const block = parseBlock(element as HTMLElement);
       if (block) {
+        console.log(`[Notion to Slides] Block ${index + 1}: ${block.type}${block.level ? ` H${block.level}` : ''} - "${block.content?.substring(0, 50)}..."`);
         blocks.push(block);
       }
     });
 
+    console.log(`[Notion to Slides] Successfully parsed ${blocks.length} blocks`);
+    if (blocks.length === 0) {
+      console.error('[Notion to Slides] No blocks parsed! DOM:', document.body.innerHTML.substring(0, 500));
+    }
+
     return blocks;
   } catch (error) {
     console.error('[Notion to Slides] Parsing error:', error);
+    console.error('[Notion to Slides] Stack:', (error as Error).stack);
     return [];
   }
 }
@@ -42,16 +89,30 @@ export function parseNotionPage(): NotionBlock[] {
  * Parse a single Notion block element
  */
 function parseBlock(element: HTMLElement): NotionBlock | null {
+  // Get block ID from data-block-id or id attribute
   const blockId =
-    element.getAttribute('data-block-id') || uuidv4();
+    element.getAttribute('data-block-id') ||
+    element.getAttribute('id') ||
+    uuidv4();
 
-  // Check for heading (using ARIA role)
-  if (element.querySelector('[role="heading"]')) {
+  // Check if element itself is a heading tag
+  if (element.tagName.match(/^H[1-6]$/)) {
+    return parseHeading(element, blockId);
+  }
+
+  // Check for heading (multiple methods)
+  const isHeading =
+    element.querySelector('[role="heading"]') ||
+    element.querySelector('h1, h2, h3, h4, h5, h6') ||
+    element.classList.contains('notion-header-block') ||
+    Array.from(element.classList).some(c => c.includes('heading'));
+
+  if (isHeading) {
     return parseHeading(element, blockId);
   }
 
   // Check for list (using ARIA role)
-  if (element.querySelector('[role="list"]')) {
+  if (element.querySelector('[role="list"]') || element.tagName === 'UL' || element.tagName === 'OL') {
     return parseList(element, blockId);
   }
 
@@ -62,18 +123,20 @@ function parseBlock(element: HTMLElement): NotionBlock | null {
   }
 
   // Check for code block
-  if (element.querySelector('code')) {
+  if (element.querySelector('code, pre') || element.classList.contains('code')) {
     return parseCodeBlock(element, blockId);
   }
 
   // Check for quote
-  if (element.classList.contains('notion-quote-block')) {
+  if (element.classList.contains('notion-quote-block') ||
+      element.querySelector('blockquote') ||
+      element.tagName === 'BLOCKQUOTE') {
     return parseQuote(element, blockId);
   }
 
-  // Default to paragraph
+  // Default to paragraph if it has content (and is actually a paragraph tag or has text)
   const content = extractTextContent(element);
-  if (content) {
+  if (content && content.trim().length > 0) {
     return {
       id: blockId,
       type: NotionBlockType.PARAGRAPH,
@@ -92,12 +155,53 @@ function parseHeading(
   element: HTMLElement,
   blockId: string
 ): NotionBlock | null {
-  const headingElement = element.querySelector('[role="heading"]') as HTMLElement;
-  if (!headingElement) return null;
+  let headingElement: HTMLElement | null = null;
+  let level = 1;
 
-  const ariaLevel = headingElement.getAttribute('aria-level');
-  const level = ariaLevel ? parseInt(ariaLevel, 10) : 1;
+  // Check if element itself is a heading tag (e.g., <h1>)
+  if (element.tagName.match(/^H[1-6]$/)) {
+    headingElement = element;
+    level = parseInt(element.tagName.substring(1), 10);
+  } else {
+    // Try ARIA role
+    headingElement = element.querySelector('[role="heading"]') as HTMLElement;
+    if (headingElement) {
+      const ariaLevel = headingElement.getAttribute('aria-level');
+      level = ariaLevel ? parseInt(ariaLevel, 10) : 1;
+    }
+  }
+
+  // If not found, try h1, h2, h3 tags within element
+  if (!headingElement) {
+    headingElement = element.querySelector('h1, h2, h3, h4, h5, h6') as HTMLElement;
+    if (headingElement) {
+      level = parseInt(headingElement.tagName.substring(1), 10);
+    }
+  }
+
+  // Try data-content-editable-leaf with heading classes
+  if (!headingElement) {
+    const leafElement = element.querySelector('[data-content-editable-leaf="true"]') as HTMLElement;
+    if (leafElement) {
+      const parent = leafElement.closest('[class*="heading"], [class*="header"]');
+      if (parent) {
+        headingElement = leafElement;
+        // Try to detect level from classes
+        const className = parent.className;
+        if (className.includes('heading_1') || className.includes('header-1')) level = 1;
+        else if (className.includes('heading_2') || className.includes('header-2')) level = 2;
+        else if (className.includes('heading_3') || className.includes('header-3')) level = 3;
+      }
+    }
+  }
+
+  if (!headingElement) {
+    console.warn('[Notion to Slides] No heading element found:', blockId);
+    return null;
+  }
+
   const content = extractTextContent(headingElement);
+  console.log(`[Notion to Slides] ✓ Heading H${level}: "${content?.substring(0, 50)}..."`);
 
   return {
     id: blockId,
