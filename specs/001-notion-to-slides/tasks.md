@@ -63,8 +63,8 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T015 [P] [US1] E2E test for popup activation and slide display in tests/e2e/basicConversion.spec.ts
-- [ ] T016 [P] [US1] E2E test for keyboard navigation (arrows, Escape) in tests/e2e/basicConversion.spec.ts
+- [X] T015 [P] [US1] E2E test for popup activation and slide display in tests/e2e/basicConversion.spec.ts
+- [X] T016 [P] [US1] E2E test for keyboard navigation (arrows, Escape) in tests/e2e/basicConversion.spec.ts
 - [X] T017 [P] [US1] Unit test for H1 boundary slide generation in tests/unit/slideGenerator.test.ts
 - [X] T018 [P] [US1] Unit test for Notion DOM parsing with H1 headings in tests/unit/parser.test.ts
 - [X] T019 [P] [US1] Integration test for full parsing to slide generation flow in tests/integration/notionParsing.test.ts

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Notion Page</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      padding: 40px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    [role="heading"] {
+      font-weight: 600;
+      margin: 1em 0 0.5em;
+    }
+    [aria-level="1"] {
+      font-size: 2.5em;
+    }
+    [aria-level="2"] {
+      font-size: 1.875em;
+    }
+    [aria-level="3"] {
+      font-size: 1.5em;
+    }
+    p {
+      line-height: 1.6;
+      margin: 0.5em 0;
+    }
+    ul, ol {
+      margin: 0.5em 0;
+      padding-left: 1.5em;
+    }
+    strong {
+      font-weight: 600;
+    }
+    em {
+      font-style: italic;
+    }
+    code {
+      background: #f3f3f3;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    pre {
+      background: #f3f3f3;
+      padding: 16px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Slide 1: Introduction -->
+  <div data-block-id="block-001">
+    <h1 role="heading" aria-level="1">Introduction to Testing</h1>
+  </div>
+
+  <div data-block-id="block-002">
+    <p>This is a <strong>test page</strong> for the <em>Notion to Slides</em> extension.</p>
+  </div>
+
+  <div data-block-id="block-003">
+    <p>It contains multiple slides separated by H1 headings.</p>
+  </div>
+
+  <!-- Slide 2: Features -->
+  <div data-block-id="block-004">
+    <h1 role="heading" aria-level="1">Key Features</h1>
+  </div>
+
+  <div data-block-id="block-005">
+    <h2 role="heading" aria-level="2">Parsing</h2>
+  </div>
+
+  <div data-block-id="block-006">
+    <p>The extension parses Notion DOM using ARIA roles and CSS selectors.</p>
+  </div>
+
+  <div data-block-id="block-007" role="list">
+    <ul>
+      <li>Heading detection (H1-H6)</li>
+      <li>Paragraph extraction</li>
+      <li>List parsing (bullet and numbered)</li>
+      <li>Image and code block support</li>
+    </ul>
+  </div>
+
+  <!-- Slide 3: Navigation -->
+  <div data-block-id="block-008">
+    <h1 role="heading" aria-level="1">Navigation Controls</h1>
+  </div>
+
+  <div data-block-id="block-009">
+    <h3 role="heading" aria-level="3">Keyboard Shortcuts</h3>
+  </div>
+
+  <div data-block-id="block-010" role="list">
+    <ul>
+      <li><code>→</code> or <code>↓</code>: Next slide</li>
+      <li><code>←</code> or <code>↑</code>: Previous slide</li>
+      <li><code>Home</code>: First slide</li>
+      <li><code>End</code>: Last slide</li>
+      <li><code>Esc</code>: Close presentation</li>
+    </ul>
+  </div>
+
+  <!-- Slide 4: Formatting -->
+  <div data-block-id="block-011">
+    <h1 role="heading" aria-level="1">Text Formatting</h1>
+  </div>
+
+  <div data-block-id="block-012">
+    <p>The extension preserves various text formatting options:</p>
+  </div>
+
+  <div data-block-id="block-013">
+    <p><strong>Bold text</strong> for emphasis</p>
+  </div>
+
+  <div data-block-id="block-014">
+    <p><em>Italic text</em> for style</p>
+  </div>
+
+  <div data-block-id="block-015">
+    <p><code>Inline code</code> for technical terms</p>
+  </div>
+
+  <!-- Slide 5: Code Example -->
+  <div data-block-id="block-016">
+    <h1 role="heading" aria-level="1">Code Example</h1>
+  </div>
+
+  <div data-block-id="block-017">
+    <p>Here's a simple TypeScript example:</p>
+  </div>
+
+  <div data-block-id="block-018" data-language="typescript">
+    <pre><code>interface Slide {
+  id: string;
+  title: string;
+  blocks: NotionBlock[];
+}</code></pre>
+  </div>
+
+  <!-- Slide 6: Testing -->
+  <div data-block-id="block-019">
+    <h1 role="heading" aria-level="1">Testing Strategy</h1>
+  </div>
+
+  <div data-block-id="block-020">
+    <h2 role="heading" aria-level="2">Unit Tests</h2>
+  </div>
+
+  <div data-block-id="block-021">
+    <p>Test individual components in isolation</p>
+  </div>
+
+  <div data-block-id="block-022">
+    <h2 role="heading" aria-level="2">Integration Tests</h2>
+  </div>
+
+  <div data-block-id="block-023">
+    <p>Test the full parsing to slide generation flow</p>
+  </div>
+
+  <div data-block-id="block-024">
+    <h2 role="heading" aria-level="2">E2E Tests</h2>
+  </div>
+
+  <div data-block-id="block-025">
+    <p>Test the extension in a real browser environment with Playwright</p>
+  </div>
+
+  <!-- Slide 7: Conclusion -->
+  <div data-block-id="block-026">
+    <h1 role="heading" aria-level="1">Conclusion</h1>
+  </div>
+
+  <div data-block-id="block-027">
+    <p>This test page demonstrates all the key features of the Notion to Slides extension.</p>
+  </div>
+
+  <div data-block-id="block-028">
+    <p>Thank you for testing!</p>
+  </div>
+
+  <!-- Mock Notion page indicator -->
+  <script>
+    // Make this page identifiable as a mock Notion page
+    document.body.setAttribute('data-test-page', 'notion-mock');
+
+    // Add notion.so domain simulation
+    if (window.location.protocol === 'file:') {
+      // Override location for testing
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          href: 'https://www.notion.so/test-page',
+          hostname: 'www.notion.so',
+        },
+        writable: true,
+      });
+    }
+  </script>
+</body>
+</html>
