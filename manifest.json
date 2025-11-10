@@ -29,9 +29,6 @@
       ],
       "js": [
         "src/pages/content/index.tsx"
-      ],
-      "css": [
-        "src/pages/content/style.css"
       ]
     }
   ],
