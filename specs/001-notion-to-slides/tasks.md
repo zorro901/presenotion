@@ -25,12 +25,12 @@
 
 **Purpose**: Project initialization and basic configuration
 
-- [ ] T001 Install testing dependencies (vitest, @vitest/ui, playwright, @playwright/test, @axe-core/playwright) via npm
-- [ ] T002 Create vitest.config.ts with jsdom environment and test setup configuration
-- [ ] T003 Create playwright.config.ts with Chrome extension loading configuration
-- [ ] T004 Create tests/setup.ts for global test setup and mocks
-- [ ] T005 [P] Update manifest.json with Notion permissions and keyboard commands
-- [ ] T006 [P] Create src/types/notion.ts with NotionBlock, Slide, SlideDeck, NavigationState, ExtensionMessage interfaces
+- [X] T001 Install testing dependencies (vitest, @vitest/ui, playwright, @playwright/test, @axe-core/playwright) via npm
+- [X] T002 Create vitest.config.ts with jsdom environment and test setup configuration
+- [X] T003 Create playwright.config.ts with Chrome extension loading configuration
+- [X] T004 Create tests/setup.ts for global test setup and mocks
+- [X] T005 [P] Update manifest.json with Notion permissions and keyboard commands
+- [X] T006 [P] Create src/types/notion.ts with NotionBlock, Slide, SlideDeck, NavigationState, ExtensionMessage interfaces
 
 ---
 
@@ -40,14 +40,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 Create src/lib/slideGenerator.ts with basic slide generation skeleton (H1 boundary detection logic)
-- [ ] T008 Create src/lib/fontScaler.ts with dynamic font scaling calculation algorithm
-- [ ] T009 [P] Create src/lib/keyboardHandler.ts with keyboard event handling setup
-- [ ] T010 [P] Create src/pages/content/parser.ts with Notion DOM parsing using ARIA roles and CSS selectors
-- [ ] T011 Create src/components/SlideViewer/SlideViewer.tsx with main slide viewer component skeleton
-- [ ] T012 [P] Create src/components/SlideViewer/Slide.tsx with individual slide rendering component
-- [ ] T013 [P] Create src/components/SlideViewer/Navigation.tsx with navigation controls (prev/next buttons)
-- [ ] T014 [P] Create src/components/SlideViewer/SlideCounter.tsx with "slide X of Y" counter component
+- [X] T007 Create src/lib/slideGenerator.ts with basic slide generation skeleton (H1 boundary detection logic)
+- [X] T008 Create src/lib/fontScaler.ts with dynamic font scaling calculation algorithm
+- [X] T009 [P] Create src/lib/keyboardHandler.ts with keyboard event handling setup
+- [X] T010 [P] Create src/pages/content/parser.ts with Notion DOM parsing using ARIA roles and CSS selectors
+- [X] T011 Create src/components/SlideViewer/SlideViewer.tsx with main slide viewer component skeleton
+- [X] T012 [P] Create src/components/SlideViewer/Slide.tsx with individual slide rendering component
+- [X] T013 [P] Create src/components/SlideViewer/Navigation.tsx with navigation controls (prev/next buttons)
+- [X] T014 [P] Create src/components/SlideViewer/SlideCounter.tsx with "slide X of Y" counter component
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -65,22 +65,22 @@
 
 - [ ] T015 [P] [US1] E2E test for popup activation and slide display in tests/e2e/basicConversion.spec.ts
 - [ ] T016 [P] [US1] E2E test for keyboard navigation (arrows, Escape) in tests/e2e/basicConversion.spec.ts
-- [ ] T017 [P] [US1] Unit test for H1 boundary slide generation in tests/unit/slideGenerator.test.ts
-- [ ] T018 [P] [US1] Unit test for Notion DOM parsing with H1 headings in tests/unit/parser.test.ts
-- [ ] T019 [P] [US1] Integration test for full parsing to slide generation flow in tests/integration/notionParsing.test.ts
+- [X] T017 [P] [US1] Unit test for H1 boundary slide generation in tests/unit/slideGenerator.test.ts
+- [X] T018 [P] [US1] Unit test for Notion DOM parsing with H1 headings in tests/unit/parser.test.ts
+- [X] T019 [P] [US1] Integration test for full parsing to slide generation flow in tests/integration/notionParsing.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Implement parseNotionPage() in src/pages/content/parser.ts to extract NotionBlocks using ARIA role="heading" and data-block-id
-- [ ] T021 [US1] Implement generateSlides() in src/lib/slideGenerator.ts to group blocks by H1 headings
-- [ ] T022 [US1] Implement useSlideNavigation() custom hook in src/lib/keyboardHandler.ts with arrow keys, Escape handlers
-- [ ] T023 [US1] Implement SlideViewer component in src/components/SlideViewer/SlideViewer.tsx with slide state management
-- [ ] T024 [US1] Implement Slide component rendering in src/components/SlideViewer/Slide.tsx with title and basic content display
-- [ ] T025 [US1] Update src/pages/popup/Popup.tsx to send start_presentation message to content script
-- [ ] T026 [US1] Implement message listener in src/pages/content/index.tsx to receive start_presentation and trigger parsing
-- [ ] T027 [US1] Inject SlideViewer overlay into Notion page DOM in src/pages/content/index.tsx
-- [ ] T028 [US1] Add close button handler to Navigation component to send close_presentation message
-- [ ] T029 [US1] Implement slide counter display in SlideCounter component showing "slide X of Y"
+- [X] T020 [US1] Implement parseNotionPage() in src/pages/content/parser.ts to extract NotionBlocks using ARIA role="heading" and data-block-id
+- [X] T021 [US1] Implement generateSlides() in src/lib/slideGenerator.ts to group blocks by H1 headings
+- [X] T022 [US1] Implement useSlideNavigation() custom hook in src/lib/keyboardHandler.ts with arrow keys, Escape handlers
+- [X] T023 [US1] Implement SlideViewer component in src/components/SlideViewer/SlideViewer.tsx with slide state management
+- [X] T024 [US1] Implement Slide component rendering in src/components/SlideViewer/Slide.tsx with title and basic content display
+- [X] T025 [US1] Update src/pages/popup/Popup.tsx to send start_presentation message to content script
+- [X] T026 [US1] Implement message listener in src/pages/content/index.tsx to receive start_presentation and trigger parsing
+- [X] T027 [US1] Inject SlideViewer overlay into Notion page DOM in src/pages/content/index.tsx
+- [X] T028 [US1] Add close button handler to Navigation component to send close_presentation message
+- [X] T029 [US1] Implement slide counter display in SlideCounter component showing "slide X of Y"
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently (MVP complete!)
 

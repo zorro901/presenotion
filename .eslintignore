@@ -1,0 +1,29 @@
+# Build output
+dist/
+dist_chrome/
+dist_firefox/
+build/
+
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Generated files
+public/manifest.json
+*.tsbuildinfo
+
+# Configuration files that don't need linting
+*.config.js
+*.config.ts
+vite.config.*.ts
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+.cache/

@@ -377,6 +377,10 @@ $RECYCLE.BIN/
 # dependencies
 /node_modules
 
+# lock files (use bun.lockb only)
+package-lock.json
+yarn.lock
+
 # testing
 /coverage
 

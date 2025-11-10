@@ -1,41 +1,49 @@
 {
   "manifest_version": 3,
-  "name": "name in manifest.json",
-  "description": "description in manifest.json",
-  "options_ui": {
-    "page": "src/pages/options/index.html"
-  },
+  "name": "Notion to Slides",
+  "description": "Convert Notion pages into presentation slides",
+  "version": "0.1.0",
   "action": {
     "default_popup": "src/pages/popup/index.html",
     "default_icon": {
-      "32": "icon-32.png"
+      "32": "icon-32.png",
+      "128": "icon-128.png"
     }
   },
-  "chrome_url_overrides": {
-    "newtab": "src/pages/newtab/index.html"
-  },
   "icons": {
+    "32": "icon-32.png",
     "128": "icon-128.png"
   },
   "permissions": [
     "activeTab"
   ],
+  "host_permissions": [
+    "https://notion.so/*",
+    "https://*.notion.so/*"
+  ],
   "content_scripts": [
     {
       "matches": [
-        "http://*/*",
-        "https://*/*",
-        "<all_urls>"
+        "https://notion.so/*",
+        "https://*.notion.so/*"
       ],
       "js": [
         "src/pages/content/index.tsx"
       ],
       "css": [
-        "contentStyle.css"
+        "src/pages/content/style.css"
       ]
     }
   ],
-  "devtools_page": "src/pages/devtools/index.html",
+  "commands": {
+    "start-presentation": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+P",
+        "mac": "Command+Shift+P"
+      },
+      "description": "Start Notion slide presentation"
+    }
+  },
   "web_accessible_resources": [
     {
       "resources": [
@@ -43,7 +51,10 @@
         "icon-128.png",
         "icon-32.png"
       ],
-      "matches": []
+      "matches": [
+        "https://notion.so/*",
+        "https://*.notion.so/*"
+      ]
     }
   ]
 }
