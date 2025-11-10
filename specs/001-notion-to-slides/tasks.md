@@ -63,13 +63,17 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [X] T015 [P] [US1] E2E test for popup activation and slide display in tests/e2e/basicConversion.spec.ts (Manual testing checklist - see tests/e2e/README.md)
-- [X] T016 [P] [US1] E2E test for keyboard navigation (arrows, Escape) in tests/e2e/basicConversion.spec.ts (Manual testing checklist - see tests/e2e/README.md)
+- [X] T014a [P] [US1] E2E test for extension loading and configuration in tests/e2e/extensionLoad.spec.ts (5 automated tests)
+- [X] T015 [P] [US1] E2E test for popup activation and slide display in tests/e2e/basicConversion.spec.ts (4 manual test cases - see tests/e2e/README.md)
+- [X] T016 [P] [US1] E2E test for keyboard navigation (arrows, Escape) in tests/e2e/basicConversion.spec.ts (9 manual test cases - see tests/e2e/README.md)
 - [X] T017 [P] [US1] Unit test for H1 boundary slide generation in tests/unit/slideGenerator.test.ts
 - [X] T018 [P] [US1] Unit test for Notion DOM parsing with H1 headings in tests/unit/parser.test.ts
 - [X] T019 [P] [US1] Integration test for full parsing to slide generation flow in tests/integration/notionParsing.test.ts
 
-> **NOTE: T015 and T016** - Automated E2E testing for Chrome extensions is complex. Tests serve as specifications. Use manual testing checklist in `tests/e2e/README.md`.
+> **E2E Testing Strategy**:
+> - **Automated** (5 tests): Extension loading, manifest validation, file existence
+> - **Manual** (13 test cases): User interactions, popup activation, keyboard navigation
+> - See `tests/e2e/README.md` for manual testing checklist
 
 ### Implementation for User Story 1
 

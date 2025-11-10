@@ -1,16 +1,29 @@
 # E2E Tests for Notion to Slides
 
-This directory contains end-to-end (E2E) test specifications for the Notion to Slides Chrome extension.
+This directory contains end-to-end (E2E) tests for the Notion to Slides Chrome extension.
 
-## ⚠️ Current Status
+## Test Structure
 
-**Manual Testing Required**: Automated E2E tests for Chrome extensions are complex due to:
-- Chrome extension isolated execution contexts
-- Content script injection limitations
-- Chrome API dependencies
-- Manifest V3 restrictions
+### ✅ Automated Tests (5 tests - `extensionLoad.spec.ts`)
 
-The test files serve as **test specifications** and **manual testing checklists**.
+**Running**: `bun run test:e2e extensionLoad.spec.ts`
+
+Basic extension functionality that can be automated:
+- Extension loads successfully
+- Manifest configuration is correct
+- Required files exist (icons, popup, content scripts)
+- Content script configuration for Notion domains
+- Extension initialization
+
+### 📋 Manual Tests (13 test cases - see checklist below)
+
+**Reference**: `basicConversion.spec.ts` (test specifications)
+
+Complex user interactions requiring manual verification:
+- Popup activation and slide display
+- Keyboard navigation
+- Slide rendering with real Notion content
+- User interaction flows
 
 ## Manual Testing Guide
 
