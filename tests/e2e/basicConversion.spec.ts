@@ -32,8 +32,9 @@ test.beforeAll(async () => {
   }
 
   // Launch browser with extension loaded
+  // Use new headless mode (Chrome 109+) which supports extensions
   context = await chromium.launchPersistentContext('', {
-    headless: false,
+    headless: true,
     args: [
       `--disable-extensions-except=${EXTENSION_PATH}`,
       `--load-extension=${EXTENSION_PATH}`,

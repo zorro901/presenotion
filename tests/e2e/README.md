@@ -6,7 +6,17 @@ This directory contains end-to-end (E2E) tests for the Notion to Slides Chrome e
 
 ### ✅ Automated Tests (5 tests - `extensionLoad.spec.ts`)
 
-**Running**: `bun run test:e2e extensionLoad.spec.ts`
+**Running**:
+```bash
+# Headless mode (default)
+bun run test:e2e extensionLoad.spec.ts
+
+# Headed mode (show browser)
+bun run test:e2e extensionLoad.spec.ts --headed
+
+# Debug mode
+bun run test:e2e:debug extensionLoad.spec.ts
+```
 
 Basic extension functionality that can be automated:
 - Extension loads successfully
@@ -14,6 +24,8 @@ Basic extension functionality that can be automated:
 - Required files exist (icons, popup, content scripts)
 - Content script configuration for Notion domains
 - Extension initialization
+
+**Note**: Tests run in headless mode by default using Chrome's new headless mode (Chrome 109+) which supports extensions.
 
 ### 📋 Manual Tests (13 test cases - see checklist below)
 
