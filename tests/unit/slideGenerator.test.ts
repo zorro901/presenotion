@@ -9,12 +9,12 @@ import { NotionBlock, NotionBlockType } from '@/types/notion';
 
 describe('slideGenerator', () => {
   describe('generateSlides', () => {
-    it('creates slides from H1 headings', () => {
+    it('creates slides from Heading 1 (H2 in Notion)', () => {
       const blocks: NotionBlock[] = [
         {
           id: '1',
           type: NotionBlockType.HEADING,
-          level: 1,
+          level: 2,
           content: 'Slide 1',
         },
         {
@@ -25,7 +25,7 @@ describe('slideGenerator', () => {
         {
           id: '3',
           type: NotionBlockType.HEADING,
-          level: 1,
+          level: 2,
           content: 'Slide 2',
         },
         {
@@ -47,19 +47,19 @@ describe('slideGenerator', () => {
       expect(slides[1].blocks[0].content).toBe('Content for slide 2');
     });
 
-    it('treats H2-H6 headings as content, not slide boundaries', () => {
+    it('treats H1 and H3-H6 headings as content, not slide boundaries', () => {
       const blocks: NotionBlock[] = [
         {
           id: '1',
           type: NotionBlockType.HEADING,
-          level: 1,
+          level: 2,
           content: 'Main Slide',
         },
         {
           id: '2',
           type: NotionBlockType.HEADING,
-          level: 2,
-          content: 'Subsection',
+          level: 1,
+          content: 'Title (H1)',
         },
         {
           id: '3',
@@ -72,10 +72,10 @@ describe('slideGenerator', () => {
 
       expect(slides).toHaveLength(1);
       expect(slides[0].title).toBe('Main Slide');
-      expect(slides[0].blocks).toHaveLength(2); // H2 and paragraph
+      expect(slides[0].blocks).toHaveLength(2); // H1 and paragraph
     });
 
-    it('handles pages with no H1 headings', () => {
+    it('handles pages with no Heading 1 (no H2 tags)', () => {
       const blocks: NotionBlock[] = [
         {
           id: '1',
@@ -107,9 +107,9 @@ describe('slideGenerator', () => {
 
     it('sets correct slide indices', () => {
       const blocks: NotionBlock[] = [
-        { id: '1', type: NotionBlockType.HEADING, level: 1, content: 'Slide 1' },
-        { id: '2', type: NotionBlockType.HEADING, level: 1, content: 'Slide 2' },
-        { id: '3', type: NotionBlockType.HEADING, level: 1, content: 'Slide 3' },
+        { id: '1', type: NotionBlockType.HEADING, level: 2, content: 'Slide 1' },
+        { id: '2', type: NotionBlockType.HEADING, level: 2, content: 'Slide 2' },
+        { id: '3', type: NotionBlockType.HEADING, level: 2, content: 'Slide 3' },
       ];
 
       const slides = generateSlides(blocks);
@@ -122,7 +122,7 @@ describe('slideGenerator', () => {
 
     it('calculates metadata correctly', () => {
       const blocks: NotionBlock[] = [
-        { id: '1', type: NotionBlockType.HEADING, level: 1, content: 'Test Slide' },
+        { id: '1', type: NotionBlockType.HEADING, level: 2, content: 'Test Slide' },
         { id: '2', type: NotionBlockType.IMAGE, content: '', imageUrl: 'test.jpg' },
         { id: '3', type: NotionBlockType.CODE, content: 'console.log("test")', codeLanguage: 'javascript' },
         { id: '4', type: NotionBlockType.BULLET_LIST, content: '', listItems: ['Item 1', 'Item 2'], listType: 'bullet' },
@@ -141,7 +141,7 @@ describe('slideGenerator', () => {
   describe('generateSlideDeck', () => {
     it('creates a valid slide deck', () => {
       const blocks: NotionBlock[] = [
-        { id: '1', type: NotionBlockType.HEADING, level: 1, content: 'Slide 1' },
+        { id: '1', type: NotionBlockType.HEADING, level: 2, content: 'Slide 1' },
         { id: '2', type: NotionBlockType.PARAGRAPH, content: 'Content' },
       ];
       const pageUrl = 'https://notion.so/test-page';
@@ -158,9 +158,9 @@ describe('slideGenerator', () => {
 
     it('sets totalSlides equal to slides.length', () => {
       const blocks: NotionBlock[] = [
-        { id: '1', type: NotionBlockType.HEADING, level: 1, content: 'Slide 1' },
-        { id: '2', type: NotionBlockType.HEADING, level: 1, content: 'Slide 2' },
-        { id: '3', type: NotionBlockType.HEADING, level: 1, content: 'Slide 3' },
+        { id: '1', type: NotionBlockType.HEADING, level: 2, content: 'Slide 1' },
+        { id: '2', type: NotionBlockType.HEADING, level: 2, content: 'Slide 2' },
+        { id: '3', type: NotionBlockType.HEADING, level: 2, content: 'Slide 3' },
       ];
 
       const deck = generateSlideDeck(blocks, 'https://notion.so/test');

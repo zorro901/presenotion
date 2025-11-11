@@ -28,28 +28,28 @@ export function generateSlides(blocks: NotionBlock[]): Slide[] {
   const slides: Slide[] = [];
   let currentSlideBlocks: NotionBlock[] = [];
   let currentTitle = 'Untitled Slide';
-  let hasSeenH1 = false;
+  let hasSeenHeading = false;
 
   blocks.forEach((block) => {
-    // Check if this is an H1 heading (slide boundary)
-    if (block.type === NotionBlockType.HEADING && block.level === 1) {
-      // Save previous slide if we've seen an H1 before
-      if (hasSeenH1) {
+    // Check if this is a Heading 1 (H2 in Notion, level 2) - slide boundary
+    if (block.type === NotionBlockType.HEADING && block.level === 2) {
+      // Save previous slide if we've seen a heading before
+      if (hasSeenHeading) {
         slides.push(createSlide(slides.length, currentTitle, currentSlideBlocks));
       }
 
       // Start new slide
       currentTitle = block.content || 'Untitled Slide';
       currentSlideBlocks = [];
-      hasSeenH1 = true;
+      hasSeenHeading = true;
     } else {
       // Add block to current slide
       currentSlideBlocks.push(block);
     }
   });
 
-  // Add final slide if we've seen at least one H1 or have content
-  if (hasSeenH1 || currentSlideBlocks.length > 0) {
+  // Add final slide if we've seen at least one heading or have content
+  if (hasSeenHeading || currentSlideBlocks.length > 0) {
     slides.push(createSlide(slides.length, currentTitle, currentSlideBlocks));
   }
 

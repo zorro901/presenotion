@@ -17,7 +17,7 @@ describe('Notion Parsing Integration', () => {
     // Create realistic Notion page structure
     document.body.innerHTML = `
       <div data-block-id="block-1">
-        <div role="heading" aria-level="1">
+        <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">Introduction</div>
         </div>
       </div>
@@ -25,7 +25,7 @@ describe('Notion Parsing Integration', () => {
         <div data-content-editable-leaf="true">Welcome to the presentation</div>
       </div>
       <div data-block-id="block-3">
-        <div role="heading" aria-level="1">
+        <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">Main Topics</div>
         </div>
       </div>
@@ -36,7 +36,7 @@ describe('Notion Parsing Integration', () => {
         </ul>
       </div>
       <div data-block-id="block-5">
-        <div role="heading" aria-level="1">
+        <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">Conclusion</div>
         </div>
       </div>
@@ -75,7 +75,7 @@ describe('Notion Parsing Integration', () => {
   it('handles pages with mixed content types', () => {
     document.body.innerHTML = `
       <div data-block-id="block-1">
-        <div role="heading" aria-level="1">
+        <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">Rich Content Slide</div>
         </div>
       </div>
@@ -98,15 +98,15 @@ describe('Notion Parsing Integration', () => {
     expect(deck.slides[0].metadata.hasCode).toBe(true);
   });
 
-  it('handles pages with no H1 headings', () => {
+  it('handles pages with Heading 1 (H2) creating slides correctly', () => {
     document.body.innerHTML = `
       <div data-block-id="block-1">
-        <div data-content-editable-leaf="true">Just a paragraph</div>
-      </div>
-      <div data-block-id="block-2">
         <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">H2 Heading</div>
         </div>
+      </div>
+      <div data-block-id="block-2">
+        <div data-content-editable-leaf="true">Just a paragraph</div>
       </div>
     `;
 
@@ -114,8 +114,8 @@ describe('Notion Parsing Integration', () => {
     const deck = generateSlideDeck(blocks, 'https://notion.so/test');
 
     expect(deck.slides).toHaveLength(1);
-    expect(deck.slides[0].title).toBe('Untitled Slide');
-    expect(deck.slides[0].blocks).toHaveLength(2);
+    expect(deck.slides[0].title).toBe('H2 Heading');
+    expect(deck.slides[0].blocks).toHaveLength(1);
   });
 
   it('handles empty pages', () => {
@@ -132,17 +132,17 @@ describe('Notion Parsing Integration', () => {
   it('preserves slide order', () => {
     document.body.innerHTML = `
       <div data-block-id="block-1">
-        <div role="heading" aria-level="1">
+        <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">First</div>
         </div>
       </div>
       <div data-block-id="block-2">
-        <div role="heading" aria-level="1">
+        <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">Second</div>
         </div>
       </div>
       <div data-block-id="block-3">
-        <div role="heading" aria-level="1">
+        <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">Third</div>
         </div>
       </div>
@@ -163,12 +163,12 @@ describe('Notion Parsing Integration', () => {
   it('generates unique IDs for all entities', () => {
     document.body.innerHTML = `
       <div data-block-id="block-1">
-        <div role="heading" aria-level="1">
+        <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">Slide 1</div>
         </div>
       </div>
       <div data-block-id="block-2">
-        <div role="heading" aria-level="1">
+        <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">Slide 2</div>
         </div>
       </div>
@@ -192,7 +192,7 @@ describe('Notion Parsing Integration', () => {
   it('sets createdAt timestamp', () => {
     document.body.innerHTML = `
       <div data-block-id="block-1">
-        <div role="heading" aria-level="1">
+        <div role="heading" aria-level="2">
           <div data-content-editable-leaf="true">Test</div>
         </div>
       </div>
