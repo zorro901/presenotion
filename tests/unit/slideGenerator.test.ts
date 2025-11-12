@@ -47,7 +47,7 @@ describe('slideGenerator', () => {
       expect(slides[1].blocks[0].content).toBe('Content for slide 2');
     });
 
-    it('treats H1 and H3-H6 headings as content, not slide boundaries', () => {
+    it('treats H1 as content when H2 is the slide boundary', () => {
       const blocks: NotionBlock[] = [
         {
           id: '1',
@@ -75,7 +75,105 @@ describe('slideGenerator', () => {
       expect(slides[0].blocks).toHaveLength(2); // H1 and paragraph
     });
 
-    it('handles pages with no Heading 1 (no H2 tags)', () => {
+    it('uses H3 as slide boundary when no H2 exists', () => {
+      const blocks: NotionBlock[] = [
+        {
+          id: '1',
+          type: NotionBlockType.HEADING,
+          level: 3,
+          content: 'Slide 1',
+        },
+        {
+          id: '2',
+          type: NotionBlockType.PARAGRAPH,
+          content: 'Content 1',
+        },
+        {
+          id: '3',
+          type: NotionBlockType.HEADING,
+          level: 3,
+          content: 'Slide 2',
+        },
+        {
+          id: '4',
+          type: NotionBlockType.PARAGRAPH,
+          content: 'Content 2',
+        },
+      ];
+
+      const slides = generateSlides(blocks);
+
+      expect(slides).toHaveLength(2);
+      expect(slides[0].title).toBe('Slide 1');
+      expect(slides[0].blocks).toHaveLength(1);
+      expect(slides[1].title).toBe('Slide 2');
+      expect(slides[1].blocks).toHaveLength(1);
+    });
+
+    it('uses H4 as slide boundary when only H4 exists', () => {
+      const blocks: NotionBlock[] = [
+        {
+          id: '1',
+          type: NotionBlockType.HEADING,
+          level: 4,
+          content: 'Slide 1',
+        },
+        {
+          id: '2',
+          type: NotionBlockType.PARAGRAPH,
+          content: 'Content 1',
+        },
+        {
+          id: '3',
+          type: NotionBlockType.HEADING,
+          level: 4,
+          content: 'Slide 2',
+        },
+      ];
+
+      const slides = generateSlides(blocks);
+
+      expect(slides).toHaveLength(2);
+      expect(slides[0].title).toBe('Slide 1');
+      expect(slides[1].title).toBe('Slide 2');
+    });
+
+    it('uses smallest heading level as boundary (H2 when H2 and H3 both exist)', () => {
+      const blocks: NotionBlock[] = [
+        {
+          id: '1',
+          type: NotionBlockType.HEADING,
+          level: 2,
+          content: 'Main Slide',
+        },
+        {
+          id: '2',
+          type: NotionBlockType.HEADING,
+          level: 3,
+          content: 'Subsection',
+        },
+        {
+          id: '3',
+          type: NotionBlockType.PARAGRAPH,
+          content: 'Content',
+        },
+        {
+          id: '4',
+          type: NotionBlockType.HEADING,
+          level: 2,
+          content: 'Second Slide',
+        },
+      ];
+
+      const slides = generateSlides(blocks);
+
+      expect(slides).toHaveLength(2);
+      expect(slides[0].title).toBe('Main Slide');
+      expect(slides[0].blocks).toHaveLength(2); // H3 and paragraph as content
+      expect(slides[1].title).toBe('Second Slide');
+    });
+
+    it('handles pages with no headings (returns empty slide)', () => {
       const blocks: NotionBlock[] = [
         {
           id: '1',
@@ -92,8 +190,8 @@ describe('slideGenerator', () => {
       const slides = generateSlides(blocks);
 
       expect(slides).toHaveLength(1);
-      expect(slides[0].title).toBe('Untitled Slide');
-      expect(slides[0].blocks).toHaveLength(2);
+      expect(slides[0].title).toBe('No Content');
+      expect(slides[0].blocks[0].content).toContain('no content to display');
     });
 
     it('handles empty block arrays', () => {

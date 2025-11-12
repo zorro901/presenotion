@@ -35,6 +35,7 @@ export interface NotionBlock {
   listItems?: string[];          // List item contents, only for list blocks
   listType?: 'bullet' | 'numbered'; // List type, only for list blocks
   codeLanguage?: string;         // Code block language, only for code blocks
+  children?: NotionBlock[];      // Nested blocks (for complex structures like lists with quotes)
 }
 
 // Slide metadata

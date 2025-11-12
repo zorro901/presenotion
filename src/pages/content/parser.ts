@@ -122,8 +122,14 @@ function parseBlock(element: HTMLElement): NotionBlock | null {
     return parseImage(element, blockId, img);
   }
 
-  // Check for code block
-  if (element.querySelector('code, pre') || element.classList.contains('code')) {
+  // Check for code block (multiple detection methods)
+  const hasCodeBlock =
+    element.querySelector('code, pre') ||
+    element.classList.contains('code') ||
+    element.classList.contains('notion-code-block') ||
+    Array.from(element.classList).some(c => c.includes('code'));
+
+  if (hasCodeBlock) {
     return parseCodeBlock(element, blockId);
   }
 
@@ -213,7 +219,7 @@ function parseHeading(
 }
 
 /**
- * Parse list block
+ * Parse list block with support for nested content
  */
 function parseList(
   element: HTMLElement,
@@ -223,17 +229,66 @@ function parseList(
   if (!listElement) return null;
 
   const listItems: string[] = [];
+  const children: NotionBlock[] = [];
+
+  // Get all list items
   const items = listElement.querySelectorAll('[role="listitem"]');
 
   items.forEach((item) => {
-    const content = extractTextContent(item as HTMLElement);
-    if (content) {
-      listItems.push(content);
+    const itemElement = item as HTMLElement;
+
+    // Extract only the direct text content of this list item (excluding nested blocks)
+    let textContent = '';
+
+    // Strategy 1: Find the direct content editable leaf that belongs to this list item
+    // We need to avoid nested block content
+    const directLeaf = Array.from(itemElement.querySelectorAll('[data-content-editable-leaf="true"]'))
+      .find(leaf => {
+        // Check if this leaf is a direct child (not inside a nested block)
+        let parent = leaf.parentElement;
+        while (parent && parent !== itemElement) {
+          // If we encounter another block with data-block-id, this leaf is nested
+          if (parent.hasAttribute('data-block-id') && parent !== itemElement) {
+            return false;
+          }
+          parent = parent.parentElement;
+        }
+        return true;
+      });
+
+    if (directLeaf) {
+      textContent = (directLeaf.textContent || '').trim();
+    } else {
+      // Strategy 2: Fallback for simple HTML structure (testing or simple pages)
+      // Get direct text nodes only (not from nested blocks)
+      const clonedItem = itemElement.cloneNode(true) as HTMLElement;
+
+      // Remove all nested blocks from the clone
+      const nestedBlockElements = clonedItem.querySelectorAll('[data-block-id]');
+      nestedBlockElements.forEach(nested => {
+        if (nested !== clonedItem) {
+          nested.remove();
+        }
+      });
+
+      textContent = (clonedItem.textContent || '').trim();
+    }
+
+    // If we found text, add it to the list
+    if (textContent) {
+      listItems.push(textContent);
+    }
+
+    // Check for nested blocks within this list item (e.g., quotes, nested lists)
+    const nestedBlocks = parseNestedBlocks(itemElement);
+    if (nestedBlocks.length > 0) {
+      children.push(...nestedBlocks);
     }
   });
 
   // Determine list type (bullet vs numbered)
-  const isBulletList = listElement.tagName === 'UL' ||
+  const isBulletList = element.classList.contains('notion-bulleted_list-block') ||
+    listElement.tagName === 'UL' ||
     listElement.classList.contains('notion-bulleted-list');
 
   return {
@@ -244,7 +299,47 @@ function parseList(
     content: '',
     listItems,
     listType: isBulletList ? 'bullet' : 'numbered',
+    children: children.length > 0 ? children : undefined,
   };
+}
+
+/**
+ * Parse nested blocks within a parent block (like quotes inside list items)
+ */
+function parseNestedBlocks(parentElement: HTMLElement): NotionBlock[] {
+  const nestedBlocks: NotionBlock[] = [];
+
+  // Find child blocks with data-block-id
+  const childElements = parentElement.querySelectorAll('[data-block-id]');
+
+  childElements.forEach((childElement) => {
+    // Skip if this is the parent element itself
+    if (childElement === parentElement) return;
+
+    // Check if this element is a direct descendant
+    let isDirectChild = false;
+    let parent = childElement.parentElement;
+    while (parent) {
+      if (parent === parentElement) {
+        isDirectChild = true;
+        break;
+      }
+      // Stop if we hit another block with data-block-id
+      if (parent.hasAttribute('data-block-id') && parent !== parentElement) {
+        break;
+      }
+      parent = parent.parentElement;
+    }
+
+    if (!isDirectChild) return;
+
+    const block = parseBlock(childElement as HTMLElement);
+    if (block) {
+      nestedBlocks.push(block);
+    }
+  });
+
+  return nestedBlocks;
 }
 
 /**
@@ -271,36 +366,116 @@ function parseCodeBlock(
   element: HTMLElement,
   blockId: string
 ): NotionBlock {
-  const codeElement = element.querySelector('code');
-  const content = codeElement?.textContent || '';
+  // Try multiple strategies to find code content
+  let codeElement = element.querySelector('code');
+  let preElement = element.querySelector('pre');
 
-  // Try to detect language from class names
-  const className = codeElement?.className || '';
-  const languageMatch = className.match(/language-(\w+)/);
-  const language = languageMatch ? languageMatch[1] : undefined;
+  // For Notion's code blocks, the code might be in a pre > code structure
+  if (preElement && !codeElement) {
+    codeElement = preElement.querySelector('code');
+  }
+
+  // If still not found, check if the element itself is a code or pre tag
+  if (!codeElement && (element.tagName === 'CODE' || element.tagName === 'PRE')) {
+    codeElement = element;
+  }
+
+  // Extract content using multiple methods
+  let content = '';
+  if (codeElement) {
+    content = codeElement.textContent || '';
+  } else if (preElement) {
+    content = preElement.textContent || '';
+  } else {
+    // Fallback: try to find content in editable leaf
+    const leafElement = element.querySelector('[data-content-editable-leaf="true"]');
+    content = leafElement?.textContent || element.textContent || '';
+  }
+
+  // Try to detect language from multiple sources
+  let language: string | undefined;
+
+  // 1. Try class names (e.g., language-javascript, prism-javascript)
+  const classNames = [
+    codeElement?.className || '',
+    preElement?.className || '',
+    element.className
+  ].join(' ');
+
+  const languageMatch = classNames.match(/(?:language|prism)-(\w+)/);
+  if (languageMatch) {
+    language = languageMatch[1];
+  }
+
+  // 2. Try data attributes (Notion might use data-language)
+  if (!language) {
+    language =
+      element.getAttribute('data-language') ||
+      codeElement?.getAttribute('data-language') ||
+      preElement?.getAttribute('data-language') ||
+      undefined;
+  }
 
   return {
     id: blockId,
     type: NotionBlockType.CODE,
-    content,
+    content: content.trim(),
     codeLanguage: language,
   };
 }
 
 /**
- * Parse quote block
+ * Parse quote block with nested content support
  */
 function parseQuote(
   element: HTMLElement,
   blockId: string
 ): NotionBlock {
-  const content = extractTextContent(element);
+  // Extract only the direct text content (excluding nested blocks)
+  let content = '';
+
+  // Find the direct content editable leaf that belongs to this quote
+  const directLeaf = Array.from(element.querySelectorAll('[data-content-editable-leaf="true"]'))
+    .find(leaf => {
+      // Check if this leaf is a direct child (not inside a nested block)
+      let parent = leaf.parentElement;
+      while (parent && parent !== element) {
+        // If we encounter another block with data-block-id, this leaf is nested
+        if (parent.hasAttribute('data-block-id') && parent !== element) {
+          return false;
+        }
+        parent = parent.parentElement;
+      }
+      return true;
+    });
+
+  if (directLeaf) {
+    content = (directLeaf.textContent || '').trim();
+  } else {
+    // Fallback for simple HTML structure (testing or simple pages)
+    // Clone and remove nested blocks to get only direct content
+    const clonedElement = element.cloneNode(true) as HTMLElement;
+
+    // Remove all nested blocks from the clone
+    const nestedBlockElements = clonedElement.querySelectorAll('[data-block-id]');
+    nestedBlockElements.forEach(nested => {
+      if (nested !== clonedElement) {
+        nested.remove();
+      }
+    });
+
+    content = (clonedElement.textContent || '').trim();
+  }
+
+  // Check for nested blocks within this quote
+  const nestedBlocks = parseNestedBlocks(element);
 
   return {
     id: blockId,
     type: NotionBlockType.QUOTE,
     content,
     formatting: extractFormatting(element),
+    children: nestedBlocks.length > 0 ? nestedBlocks : undefined,
   };
 }
 

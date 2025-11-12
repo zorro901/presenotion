@@ -3,8 +3,23 @@
  * Displays slide content with formatting and media
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { Slide as SlideType, NotionBlock, NotionBlockType } from '@/types/notion';
+import Prism from 'prismjs';
+
+// Import Prism core languages
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-yaml';
 
 interface SlideProps {
   slide: SlideType;
@@ -104,28 +119,48 @@ const ParagraphBlock: React.FC<{ block: NotionBlock }> = ({ block }) => {
 };
 
 /**
- * Bullet list block
+ * Bullet list block with nested content support
  */
 const BulletListBlock: React.FC<{ block: NotionBlock }> = ({ block }) => {
   return (
-    <ul className="list-disc list-inside my-2">
-      {block.listItems?.map((item, index) => (
-        <li key={index}>{item}</li>
-      ))}
-    </ul>
+    <div className="my-2">
+      <ul className="list-disc list-inside">
+        {block.listItems?.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+      {/* Render nested blocks (like quotes inside list items) */}
+      {block.children && block.children.length > 0 && (
+        <div className="ml-6 mt-2">
+          {block.children.map((childBlock) => (
+            <BlockRenderer key={childBlock.id} block={childBlock} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
 /**
- * Numbered list block
+ * Numbered list block with nested content support
  */
 const NumberedListBlock: React.FC<{ block: NotionBlock }> = ({ block }) => {
   return (
-    <ol className="list-decimal list-inside my-2">
-      {block.listItems?.map((item, index) => (
-        <li key={index}>{item}</li>
-      ))}
-    </ol>
+    <div className="my-2">
+      <ol className="list-decimal list-inside">
+        {block.listItems?.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ol>
+      {/* Render nested blocks (like quotes inside list items) */}
+      {block.children && block.children.length > 0 && (
+        <div className="ml-6 mt-2">
+          {block.children.map((childBlock) => (
+            <BlockRenderer key={childBlock.id} block={childBlock} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -147,23 +182,88 @@ const ImageBlock: React.FC<{ block: NotionBlock }> = ({ block }) => {
 };
 
 /**
- * Code block
+ * Code block with syntax highlighting
  */
 const CodeBlock: React.FC<{ block: NotionBlock }> = ({ block }) => {
+  const codeRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (codeRef.current) {
+      Prism.highlightElement(codeRef.current);
+    }
+  }, [block.content, block.codeLanguage]);
+
+  // Map Notion language names to Prism language identifiers
+  const getPrismLanguage = (lang?: string): string => {
+    if (!lang) return 'text';
+
+    const languageMap: Record<string, string> = {
+      'javascript': 'javascript',
+      'js': 'javascript',
+      'typescript': 'typescript',
+      'ts': 'typescript',
+      'jsx': 'jsx',
+      'tsx': 'tsx',
+      'python': 'python',
+      'py': 'python',
+      'java': 'java',
+      'css': 'css',
+      'bash': 'bash',
+      'sh': 'bash',
+      'shell': 'bash',
+      'json': 'json',
+      'markdown': 'markdown',
+      'md': 'markdown',
+      'sql': 'sql',
+      'yaml': 'yaml',
+      'yml': 'yaml',
+    };
+
+    return languageMap[lang.toLowerCase()] || 'text';
+  };
+
+  const prismLang = getPrismLanguage(block.codeLanguage);
+  const displayLanguage = block.codeLanguage || 'text';
+
   return (
-    <pre className="bg-gray-100 p-4 rounded my-4 overflow-auto">
-      <code className="font-mono text-sm">{block.content}</code>
-    </pre>
+      <div className="my-4 rounded overflow-hidden border border-gray-300 bg-gray-50">
+        {/* Language label */}
+        {block.codeLanguage && (
+            <div className="bg-gray-200 px-3 py-1 text-xs font-semibold text-gray-700 uppercase">
+              {displayLanguage}
+            </div>
+        )}
+
+        {/* Code content */}
+        <pre className="p-4 overflow-auto bg-gray-900 leading-none !m-0">
+          <code
+              ref={codeRef}
+              className={`language-${prismLang} font-mono text-sm text-gray-100`}
+          >
+            {block.content}
+          </code>
+        </pre>
+      </div>
   );
 };
 
 /**
- * Quote block
+ * Quote block with nested content support
  */
-const QuoteBlock: React.FC<{ block: NotionBlock }> = ({ block }) => {
+const QuoteBlock: React.FC<{ block: NotionBlock }> = ({block}) => {
   return (
-    <blockquote className="border-l-4 border-gray-400 pl-4 italic my-4">
-      <FormattedText text={block.content} formatting={block.formatting} />
+    <blockquote className="border-l-4 border-gray-400 pl-4 my-4">
+      <div className="italic">
+        <FormattedText text={block.content} formatting={block.formatting} />
+      </div>
+      {/* Render nested blocks (like lists inside quotes) */}
+      {block.children && block.children.length > 0 && (
+        <div className="mt-2 not-italic">
+          {block.children.map((childBlock) => (
+            <BlockRenderer key={childBlock.id} block={childBlock} />
+          ))}
+        </div>
+      )}
     </blockquote>
   );
 };

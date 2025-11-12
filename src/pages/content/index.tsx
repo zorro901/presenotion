@@ -1,14 +1,15 @@
 /**
  * Content script for Notion to Slides extension
- * Listens for messages from popup and injects SlideViewer component
+ * Uses react-notion-x for rendering Notion content
  */
 
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import './style.css';
-import { parseNotionPage, isNotionPage, hasContent } from './parser';
-import { generateSlideDeck } from '@/lib/slideGenerator';
-import { SlideViewer } from '@/components/SlideViewer/SlideViewer';
+import { isNotionPage } from './parser';
+import { fetchCurrentNotionPage } from '@/lib/notionClient';
+import { generateSlidesFromRecordMap } from '@/lib/notionSlideGenerator';
+import { NotionSlideViewer } from '@/components/SlideViewer/NotionSlideViewer';
 import {
   ExtensionMessage,
   MessageAction,
@@ -21,9 +22,9 @@ let slideViewerContainer: HTMLDivElement | null = null;
 
 /**
  * Start presentation mode
- * Parses Notion page and injects SlideViewer
+ * Fetches Notion page via API and injects SlideViewer
  */
-function startPresentation(pageUrl: string) {
+async function startPresentation(pageUrl: string) {
   console.log('[Notion to Slides] Starting presentation for:', pageUrl);
 
   // Check if on Notion page
@@ -33,26 +34,32 @@ function startPresentation(pageUrl: string) {
     return;
   }
 
-  // Check if page has content
-  if (!hasContent()) {
-    console.error('[Notion to Slides] Page has no content');
-    alert('This Notion page has no content to display as slides.');
-    return;
-  }
-
   try {
-    // Parse Notion page
-    const blocks = parseNotionPage();
-    console.log('[Notion to Slides] Parsed blocks:', blocks.length);
+    // Show loading message
+    showLoadingMessage();
 
-    if (blocks.length === 0) {
-      alert('Could not parse any content from this Notion page.');
+    // Fetch Notion page data via API
+    console.log('[Notion to Slides] Fetching page data...');
+    const recordMap = await fetchCurrentNotionPage();
+
+    if (!recordMap) {
+      hideLoadingMessage();
+      alert('Could not fetch Notion page data. Please make sure you are on a valid Notion page.');
       return;
     }
 
-    // Generate slide deck
-    const deck = generateSlideDeck(blocks, pageUrl);
-    console.log('[Notion to Slides] Generated slides:', deck.totalSlides);
+    console.log('[Notion to Slides] Page data fetched successfully');
+
+    // Generate slide deck from recordMap
+    const slideDeck = generateSlidesFromRecordMap(recordMap, pageUrl);
+    console.log('[Notion to Slides] Generated slides:', slideDeck.totalSlides);
+
+    hideLoadingMessage();
+
+    if (slideDeck.totalSlides === 0) {
+      alert('This Notion page has no content to display as slides.');
+      return;
+    }
 
     // Create container for SlideViewer
     slideViewerContainer = document.createElement('div');
@@ -62,11 +69,53 @@ function startPresentation(pageUrl: string) {
     // Create React root and render SlideViewer
     slideViewerRoot = createRoot(slideViewerContainer);
     slideViewerRoot.render(
-      <SlideViewer deck={deck} onClose={closePresentation} />
+      <NotionSlideViewer slideDeck={slideDeck} onClose={closePresentation} />
     );
   } catch (error) {
+    hideLoadingMessage();
     console.error('[Notion to Slides] Error starting presentation:', error);
-    alert('Error parsing Notion page. Please try again or report this issue.');
+    alert('Error loading Notion page. Please try again or report this issue.');
+  }
+}
+
+/**
+ * Show loading message
+ */
+function showLoadingMessage() {
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'notion-to-slides-loading';
+  loadingDiv.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999998;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  `;
+  loadingDiv.innerHTML = `
+    <div style="text-align: center;">
+      <div style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">
+        Loading Notion page...
+      </div>
+      <div style="color: #6b7280; font-size: 0.875rem;">
+        This may take a few seconds
+      </div>
+    </div>
+  `;
+  document.body.appendChild(loadingDiv);
+}
+
+/**
+ * Hide loading message
+ */
+function hideLoadingMessage() {
+  const loadingDiv = document.getElementById('notion-to-slides-loading');
+  if (loadingDiv && loadingDiv.parentNode) {
+    loadingDiv.parentNode.removeChild(loadingDiv);
   }
 }
 

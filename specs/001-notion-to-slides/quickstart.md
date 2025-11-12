@@ -8,16 +8,14 @@
 
 Before starting development, ensure you have:
 
-- **Node.js**: Version 18+ ([Download](https://nodejs.org/))
-- **npm**: Version 9+ (comes with Node.js)
+- **Bun**: Version 1.0+ ([Download](https://bun.sh/))
 - **Chrome Browser**: Latest stable version
 - **Git**: For version control
 - **Code Editor**: VS Code recommended (with TypeScript and ESLint extensions)
 
 Verify installations:
 ```bash
-node --version  # Should show v18.0.0 or higher
-npm --version   # Should show 9.0.0 or higher
+bun --version   # Should show 1.0.0 or higher
 git --version   # Any recent version
 ```
 
@@ -36,10 +34,10 @@ cd presenotion
 git checkout 001-notion-to-slides
 
 # Install dependencies
-npm install
+bun install
 
-# Install dev dependencies for testing
-npm install -D vitest @vitest/ui playwright @playwright/test @axe-core/playwright
+# Install dev dependencies for testing (if needed)
+bun add -d vitest @vitest/ui playwright @playwright/test @axe-core/playwright
 ```
 
 ### 2. Configure Development Environment
@@ -165,13 +163,13 @@ Edit `manifest.json` to configure for Notion:
 
 ```bash
 # Build for Chrome with watch mode
-npm run dev:chrome
+bun dev:chrome
 
 # Or build for Firefox
-npm run dev:firefox
+bun dev:firefox
 
 # For production build
-npm run build:chrome
+bun build:chrome
 ```
 
 **Output**: Builds to `dist/` directory
@@ -191,7 +189,7 @@ npm run build:chrome
 
 ### Hot Reload During Development
 
-The `npm run dev:chrome` command uses nodemon to watch for file changes:
+The `bun dev:chrome` command uses nodemon to watch for file changes:
 
 1. Make changes to TypeScript/React files in `src/`
 2. Save files
@@ -212,16 +210,16 @@ The `npm run dev:chrome` command uses nodemon to watch for file changes:
 
 ```bash
 # Run all unit tests
-npm run test
+bun test
 
 # Run tests in watch mode
-npm run test:watch
+bun test:watch
 
 # Run tests with coverage
-npm run test:coverage
+bun test:coverage
 
 # Run tests with UI
-npm run test:ui
+bun test:ui
 ```
 
 **Test structure**:
@@ -262,23 +260,23 @@ Integration tests use Vitest with mocked DOM:
 
 ```bash
 # Run integration tests (subset of unit tests)
-npm run test -- tests/integration
+bun test tests/integration
 ```
 
 ### E2E Tests (Playwright)
 
 ```bash
 # Install Playwright browsers (first time only)
-npx playwright install
+bunx playwright install
 
 # Run E2E tests
-npm run test:e2e
+bun test:e2e
 
 # Run E2E tests with UI mode
-npm run test:e2e:ui
+bun test:e2e:ui
 
 # Run E2E tests in debug mode
-npm run test:e2e:debug
+bun test:e2e:debug
 ```
 
 **Example E2E test**:
@@ -403,7 +401,7 @@ If you need additional permissions, edit `manifest.json`:
 ```
 
 After manifest changes:
-1. Rebuild: `npm run build:chrome`
+1. Rebuild: `bun build:chrome`
 2. Go to `chrome://extensions/`
 3. Click reload icon on extension
 4. Extension will show permission update prompt
@@ -418,7 +416,7 @@ After manifest changes:
 
 **Solutions**:
 1. Verify `dist/` folder exists: `ls dist/`
-2. Rebuild: `npm run build:chrome`
+2. Rebuild: `bun build:chrome`
 3. Check for build errors in terminal
 4. Ensure `manifest.json` is valid (use [JSON validator](https://jsonlint.com/))
 
@@ -440,8 +438,8 @@ After manifest changes:
 **Solutions**:
 1. Verify test setup file exists: `tests/setup.ts`
 2. Check test file paths match config
-3. For Playwright: Ensure browsers installed (`npx playwright install`)
-4. For E2E: Build extension first (`npm run build:chrome`)
+3. For Playwright: Ensure browsers installed (`bunx playwright install`)
+4. For E2E: Build extension first (`bun build:chrome`)
 5. Check for missing mock data or fixtures
 
 ### TypeScript Errors
@@ -449,9 +447,9 @@ After manifest changes:
 **Problem**: TypeScript compilation errors
 
 **Solutions**:
-1. Run type check: `npx tsc --noEmit`
+1. Run type check: `bunx tsc --noEmit`
 2. Verify `tsconfig.json` includes all source files
-3. Install missing type definitions: `npm install -D @types/package-name`
+3. Install missing type definitions: `bun add -d @types/package-name`
 4. Restart VS Code TypeScript server: `Cmd+Shift+P` → "Restart TS Server"
 
 ---
@@ -580,7 +578,7 @@ After completing quickstart:
 1. **Read Feature Spec**: Understand user stories and requirements
 2. **Review Data Model**: Familiarize with core entities (Slide, NotionBlock, etc.)
 3. **Explore Codebase**: Navigate existing Presenotion template structure
-4. **Run Tests**: Verify test setup works (`npm run test`)
+4. **Run Tests**: Verify test setup works (`bun test`)
 5. **Load Extension**: Get extension running in Chrome
 6. **Create First Test**: Write failing E2E test for User Story 1
 7. **Implement Parser**: Build Notion DOM parsing logic

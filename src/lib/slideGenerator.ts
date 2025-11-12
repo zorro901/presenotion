@@ -1,6 +1,6 @@
 /**
  * Slide generation logic
- * Converts NotionBlocks into Slides using H1 boundary detection
+ * Converts NotionBlocks into Slides using dynamic heading boundary detection
  * Based on spec.md and data-model.md
  */
 
@@ -15,13 +15,44 @@ import { v4 as uuidv4 } from 'uuid';
 import { getBaseFontSize } from './fontScaler';
 
 /**
+ * Detect the heading level to use as slide boundaries
+ * Finds the smallest heading level (excluding H1/level 1) in the page
+ * @param blocks - Array of NotionBlock objects
+ * @returns Heading level to use for slide boundaries, or null if no headings found
+ */
+function detectSlideHeadingLevel(blocks: NotionBlock[]): number | null {
+  const headingLevels = blocks
+    .filter(block => block.type === NotionBlockType.HEADING)
+    .map(block => block.level)
+    .filter((level): level is number => level !== undefined && level > 1); // Exclude H1 (level 1)
+
+  if (headingLevels.length === 0) {
+    return null; // No headings found
+  }
+
+  // Return the smallest heading level (e.g., H2=2, H3=3, etc.)
+  return Math.min(...headingLevels);
+}
+
+/**
  * Generate slides from Notion blocks
- * H1 headings create new slides, other blocks belong to current slide
+ * Automatically detects the heading level to use for slide boundaries
+ * - If H2 exists, use H2 as boundary
+ * - If only H3 exists, use H3 as boundary
+ * - If no headings, return empty slide
  * @param blocks - Array of NotionBlock objects from parser
  * @returns Array of Slide objects
  */
 export function generateSlides(blocks: NotionBlock[]): Slide[] {
   if (blocks.length === 0) {
+    return [createEmptySlide()];
+  }
+
+  // Detect which heading level to use as slide boundary
+  const slideBoundaryLevel = detectSlideHeadingLevel(blocks);
+
+  // If no headings found, return empty slide
+  if (slideBoundaryLevel === null) {
     return [createEmptySlide()];
   }
 
@@ -31,8 +62,8 @@ export function generateSlides(blocks: NotionBlock[]): Slide[] {
   let hasSeenHeading = false;
 
   blocks.forEach((block) => {
-    // Check if this is a Heading 1 (H2 in Notion, level 2) - slide boundary
-    if (block.type === NotionBlockType.HEADING && block.level === 2) {
+    // Check if this is a slide boundary heading
+    if (block.type === NotionBlockType.HEADING && block.level === slideBoundaryLevel) {
       // Save previous slide if we've seen a heading before
       if (hasSeenHeading) {
         slides.push(createSlide(slides.length, currentTitle, currentSlideBlocks));
@@ -48,14 +79,14 @@ export function generateSlides(blocks: NotionBlock[]): Slide[] {
     }
   });
 
-  // Add final slide if we've seen at least one heading or have content
-  if (hasSeenHeading || currentSlideBlocks.length > 0) {
+  // Add final slide if we've seen at least one heading
+  if (hasSeenHeading) {
     slides.push(createSlide(slides.length, currentTitle, currentSlideBlocks));
   }
 
-  // Handle edge case: no slides created (should not happen with above logic)
+  // Handle edge case: no slides created
   if (slides.length === 0) {
-    slides.push(createEmptySlide());
+    return [createEmptySlide()];
   }
 
   return slides;

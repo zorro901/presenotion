@@ -25,7 +25,7 @@
 
 **Purpose**: Project initialization and basic configuration
 
-- [X] T001 Install testing dependencies (vitest, @vitest/ui, playwright, @playwright/test, @axe-core/playwright) via npm
+- [X] T001 Install testing dependencies (vitest, @vitest/ui, playwright, @playwright/test, @axe-core/playwright) via bun
 - [X] T002 Create vitest.config.ts with jsdom environment and test setup configuration
 - [X] T003 Create playwright.config.ts with Chrome extension loading configuration
 - [X] T004 Create tests/setup.ts for global test setup and mocks

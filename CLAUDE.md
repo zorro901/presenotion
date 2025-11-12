@@ -15,7 +15,7 @@ tests/
 
 ## Commands
 
-npm test && npm run lint
+bun test && bun run lint
 
 ## Code Style
 

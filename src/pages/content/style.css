@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Prism syntax highlighting theme */
+@import "prismjs/themes/prism-tomorrow.css";
+
+/* react-notion-x styles */
+@import "react-notion-x/src/styles.css";
+
 /* Slide viewer overlay styles */
 #notion-to-slides-viewer {
   position: fixed !important;
@@ -9,6 +15,41 @@
   height: 100vh !important;
   z-index: 2147483647 !important; /* Maximum z-index value */
   background-color: #ffffff !important;
+}
+
+/* Fix numbered list counters when blocks are rendered individually */
+.slide-blocks {
+  counter-reset: slide-numbered-list;
+}
+
+/* Target top-level numbered lists directly under slide-blocks */
+.slide-blocks > ol.notion-list-numbered {
+  counter-reset: none !important;
+}
+
+.slide-blocks > ol.notion-list-numbered > li {
+  list-style: none !important;
+  counter-increment: slide-numbered-list !important;
+}
+
+.slide-blocks > ol.notion-list-numbered > li::before {
+  content: counter(slide-numbered-list) ". " !important;
+  font-weight: bold;
+  margin-right: 0.5em;
+}
+
+/* Ensure nested numbered lists keep their default behavior */
+.slide-blocks > ol.notion-list-numbered ol {
+  counter-reset: revert !important;
+}
+
+.slide-blocks > ol.notion-list-numbered ol > li {
+  list-style: revert !important;
+  counter-increment: revert !important;
+}
+
+.slide-blocks > ol.notion-list-numbered ol > li::before {
+  content: none !important;
 }
 
 .slide-viewer-overlay {
